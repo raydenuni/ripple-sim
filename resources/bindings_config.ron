@@ -1,0 +1,10 @@
+(
+    axes: {
+        "right": Emulated(pos: Key(D), neg: Key(A)),
+        "up": Emulated(pos: Key(W), neg: Key(S)),
+        
+    },
+    actions: {
+        "tick": [ [Key(Space)] ],
+    },
+)
