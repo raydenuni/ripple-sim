@@ -87,45 +87,29 @@ impl<'s> System<'s> for WaterSimulationSystem {
         for (water, color) in (&waters, &mut colors).join() {
             let water_tile = water_tiles.current[water.pos_x][water.pos_y];
             let render_alt = (water_tile.altitude + LIMIT) / (2. * LIMIT);
-            //println!("water_tile.altitude = {}", water_tile.altitude);
-            //println!("render_altitutde = {}", render_alt);
             *color = Rgba(render_alt, render_alt, render_alt, 1.0);
             //*color = Rgba(1., 1.0, 1.0, 1.0);
         }
 
 
         self.time_since_simulate += time.delta_seconds();
-        //println!("time_since_simulate {}", self.time_since_simulate);
         if self.time_since_simulate < DELAY {
             return;
         }
-        //println!("simulate");
         self.time_since_simulate = 0.;
        
 
         let mut total_height = 0.;
 
         let update_heights = |water_tiles: &WaterTiles, heights: &mut f32, num_parts: &mut u32, x: i32, y: i32, | {
-            //println!("Updating heights for {},{}", x, y);
             if y >= 0 && y < MAP_HEIGHT as i32 && x >= 0 && x < MAP_WIDTH as i32 {
                 *heights += water_tiles.current[x as usize][y as usize].altitude;
                 *num_parts += 1;
-                //println!("{},{} within bounds and has a height of {} and num_parts of {}", x, y, *heights, num_parts);
             }
         };
 
-        //println!("Before the pass.");
         for x in 0..MAP_WIDTH {
             for y in 0..MAP_HEIGHT {
-                //println!("tile[{}][{}]: {:?}", x, y, water_tiles.current[x][y]);
-            }
-        }
-
-        for x in 0..MAP_WIDTH {
-            for y in 0..MAP_HEIGHT {
-                
-                //println!("\nacceleration[{}][{}]", x, y);
-
                 water_tiles.current[x][y].acceleration = 0.;
                 total_height += water_tiles.current[x][y].altitude;
 
@@ -140,33 +124,25 @@ impl<'s> System<'s> for WaterSimulationSystem {
                         }
                     }
                 }
-                //println!("heights for [{}][{}] = {}", x, y, heights);
-                //println!("num_parts for [{}][{}] = {}", x, y, num_parts);
 
                 let tile = &mut water_tiles.current[x][y];
                 
                 // acceleration
                 if num_parts != 0 {
-                    //println!("heights = {}/{}", heights, num_parts);
                     heights /= num_parts as f32;
-                    //println!("heights = {}", heights);
 
                     if POWER != 1. {
-                        //println!("POWER != 1: {}", POWER);
                         //vda[index] += Math.Sign(heights - vd[index]) * (float)Math.Pow(Math.Abs(vd[index] - heights), power) / mass;
                         tile.acceleration += (heights - tile.acceleration).signum() * ((tile.altitude - heights).abs()).powf(POWER) / MASS;
                     }
                     else {
-                        //println!("POWER = 1");
                         //vda[index] += -(vd[index] - heights) / mass;
                         tile.acceleration += -(tile.altitude - heights) / MASS;
                     }
-                    //println!("tile.acceleration = {}", tile.acceleration);
                 }
 
                 // damping
                 tile.acceleration -= tile.velocity / tile.sustainability;
-                //println!("damping: tile.acceleration = {}", tile.acceleration);
 
                 // limit
                 if tile.acceleration > LIMIT {
@@ -174,22 +150,11 @@ impl<'s> System<'s> for WaterSimulationSystem {
                 } else if tile.acceleration < -LIMIT {
                     tile.acceleration = -LIMIT;
                 }
-                
-                //println!("limit: tile.acceleration = {}", tile.acceleration);
             }
         }
         // done calculating force
 
-        //println!("After acceleration pass.");
-        for x in 0..MAP_WIDTH {
-            for y in 0..MAP_HEIGHT {
-                //println!("tile[{}][{}]: {:?}", x, y, water_tiles.current[x][y]);
-            }
-        }
-
         let shifting = -total_height / (MAP_WIDTH * MAP_HEIGHT) as f32;
-        //println!("Shifting: {}", shifting);
-
         for x in 0..MAP_WIDTH {
             for y in 0..MAP_HEIGHT {
                 let tile = &mut water_tiles.current[x][y];
@@ -210,62 +175,5 @@ impl<'s> System<'s> for WaterSimulationSystem {
                 tile.altitude += shifting;
             }
         }
-        
-        //println!("After altitutde pass.");
-        for x in 0..MAP_WIDTH {
-            for y in 0..MAP_HEIGHT {
-                //println!("tile[{}][{}]: {:?}", x, y, water_tiles.current[x][y]);
-            }
-        }
-
-        // let tile = &mut water_tiles.current[0][0];
-        // tile.altitude = 100.;
-
     }
 }
-
-
-
-
-                // // UP
-                // x_local = x;
-                // y_local = y + 1;
-                // if y < MAP_HEIGHT {
-                //     heights += water_tiles.current[x][y].altitude;
-                //     num_parts += 1;
-                // }
-                // // UP RIGHT
-                // if y > 0 && y < MAP_HEIGHT && x > 0 && x < MAP_WIDTH {
-                //     heights += water_tiles.current[x][y].altitude;
-                //     num_parts += 1;
-                // }
-                // // RIGHT
-                // if x < MAP_WIDTH - 1 {
-                //     heights += water_tiles.current[x+1][y].altitude;
-                //     num_parts += 1;
-                // }
-                // // DOWN RIGHT
-                // if y > 0 && x < MAP_WIDTH - 1 {
-                //     heights += water_tiles.current[x+1][y-1].altitude;
-                //     num_parts += 1;
-                // }
-                // // DOWN
-                // if y > 0 {
-                //     heights += water_tiles.current[x][y-1].altitude;
-                //     num_parts += 1;
-                // }
-                // // DOWN LEFT
-                // if y > 0 && x > 0 {
-                //     heights += water_tiles.current[x-1][y-1].altitude;
-                //     num_parts += 1;
-                // }
-                // // LEFT
-                // if x > 0 {
-                //     heights += water_tiles.current[x-1][y].altitude;
-                //     num_parts += 1;
-                // }
-                // // UP LEFT
-                // if y < MAP_HEIGHT - 1 && x > 0 {
-                //     heights += water_tiles.current[x-1][y+1].altitude;
-                //     num_parts += 1;
-                // }

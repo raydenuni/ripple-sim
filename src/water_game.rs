@@ -86,30 +86,6 @@ impl Default for WaterTiles {
     }
 }
 
-fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
-    let texture_handle = {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-        loader.load(
-                "texture/pong_spritesheet.png",
-                PngFormat,
-                TextureMetadata::srgb_scale(),
-                (),
-                &texture_storage,
-        )
-    };
-
-    let loader = world.read_resource::<Loader>();
-    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
-    loader.load(
-            "texture/pong_spritesheet.ron",
-            SpriteSheetFormat,
-            texture_handle,
-            (),
-            &sprite_sheet_store,
-    )
-}
-
 fn load_sprite_sheet_by_name(world: &mut World, sheet_name: String, ron_name: String) -> SpriteSheetHandle {    
     let mut progress = ProgressCounter::new();
     let texture_handle = {

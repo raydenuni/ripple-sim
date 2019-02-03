@@ -21,8 +21,6 @@ impl <'s> System<'s> for CameraSystem {
     );
 
     fn run(&mut self, (cameras, mut transforms, time, input): Self::SystemData) {
-        //println!("updating the camera");
-
         for (camera, transform) in (&cameras, &mut transforms).join()
         {
             let movement_right = input.axis_value("right");
